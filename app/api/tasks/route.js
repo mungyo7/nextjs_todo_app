@@ -24,7 +24,7 @@ export async function POST(request) {
     const newTask = {
       name: body.name,
       order: body.order,
-      status: "continues",
+      finished: false,
       createdAt: new Date()
     };
     

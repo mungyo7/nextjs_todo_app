@@ -46,14 +46,14 @@ export function TodoProvider({ children }) {
     }
   };
 
-  const changeState = async (id, status) => {
+  const changeState = async (id, finished) => {
     try {
       const response = await fetch(`/api/tasks/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ finished }),
       });
       
       if (!response.ok) {

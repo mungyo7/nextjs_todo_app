@@ -9,7 +9,7 @@ export async function PUT(request, { params }) {
     
     const result = await db.collection("tasks").updateOne(
       { _id: new ObjectId(params.id) },
-      { $set: { status: body.status } }
+      { $set: { finished: body.finished } }
     );
     
     if (result.matchedCount === 0) {

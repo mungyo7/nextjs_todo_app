@@ -19,8 +19,8 @@ function TodoList() {
     return tasks.filter((task) => {
       const matchesSelection = 
         selection === "" ? true : 
-        selection === "continues" ? task.status === "continues" :
-        selection === "finish" ? task.status === "finish" : true;
+        selection === "continues" ? !task.finished :
+        selection === "finish" ? task.finished : true;
 
       const matchesSearch = 
         task.name.toLowerCase().includes(filteredText.toLowerCase());
@@ -43,12 +43,12 @@ function TodoList() {
         <button onClick={(e) => {
           setSelection("continues")
         }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "continues" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
-          Continues
+          In Progress
         </button>
         <button onClick={(e) => {
           setSelection("finish")
         }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "finish" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
-          Finish
+          Finished
         </button>
       </div>
 
@@ -84,12 +84,12 @@ function TodoList() {
                     <label class="flex items-center">
                       <input 
                         type="checkbox" 
-                        checked={task.status === "finish"}
-                        onChange={() => changeState(task._id, task.status === "continues" ? "finish" : "continues")}
+                        checked={task.finished}
+                        onChange={() => changeState(task._id, !task.finished)}
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                       />
                       <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                        {task.status === "finish" ? "Completed" : "In Progress"}
+                        {task.finished ? "Completed" : "In Progress"}
                       </span>
                     </label>
                   </td>
