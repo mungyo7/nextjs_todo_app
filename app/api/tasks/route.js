@@ -25,6 +25,7 @@ export async function POST(request) {
       name: body.name,
       order: body.order,
       finished: false,
+      dueDate: body.dueDate,
       createdAt: new Date()
     };
     

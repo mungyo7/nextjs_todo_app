@@ -26,14 +26,18 @@ export function TodoProvider({ children }) {
     }
   };
 
-  const addTask = async (name, order) => {
+  const addTask = async (name, dueDate) => {
     try {
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, order }),
+        body: JSON.stringify({
+          name,
+          dueDate,
+          order: tasks.length
+        }),
       });
       
       if (!response.ok) {
