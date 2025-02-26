@@ -1,112 +1,96 @@
 "use client";
 
-import { getAllTodos, setTaskState, addTask, deleteTask } from "@/services/todo/todoservice";
-const { createContext, useState, useEffect } = require("react");
+import { createContext, useState, useEffect } from 'react';
 
 const TodoContext = createContext();
 
-export const TodoProvider = ({ children }) => {
-
+export function TodoProvider({ children }) {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    setTasks(getAllTodos());
-  }, [])
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch('/api/tasks');
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
+      }
+      const data = await response.json();
+      console.log('Fetched tasks:', data); // 데이터 확인용 로그
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setTasks([]);
+    }
+  };
+
+  const addTask = async (name, order) => {
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, order }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add task');
+      }
+      
+      fetchTasks(); // 태스크 추가 후 목록 새로고침
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
+  };
+
+  const changeState = async (id, status) => {
+    try {
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+      
+      fetchTasks(); // 상태 변경 후 목록 새로고침
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  };
+
+  const deleteTask = async (id) => {
+    try {
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+      
+      fetchTasks(); // 삭제 후 목록 새로고침
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
 
   return (
-
-    <TodoContext.Provider value={{
-
-      tasks: tasks,
-      setTasks: setTasks,
-      changeState: (id, state) => {
-        const newTasks = [...tasks];
-        newTasks[id].state = state;
-        setTasks(newTasks);
-
-        //backend
-        setTaskState(id, state);
-      },
-
-      addTask: (name, order) => {
-
-        const newTasks = [...tasks, { id: tasks.length, name: name, state: false, order: order}]
-        setTasks(newTasks);
-        addTask(name);
-
-      },
-
-
-      deleteTask: (id) => {
-        const olderTasks = [...tasks]
-        olderTasks[id] = null;
-
-        let index = 0;
-
-        const newTasks = [];
-        olderTasks.map((m) => {
-          if (m != null) {
-            let element = { id: index, name: m.name, state: m.state }
-            newTasks.push(element);
-
-            index = index + 1;
-          }
-        })
-
-        setTasks(newTasks);
-        deleteTask(id);
-
-      },
-
-      filteredTasks: (filter, tasks, filteredText, order) => {
-        return tasks.filter((task) => {
-          if (filter == "finish") {
-            if (task.state == true) {
-              if (task.name.toLowerCase().includes(filteredText.toLowerCase())) {
-                if (order != 4) {
-                  if (task.order != order) {
-                    return false;
-                  }
-                }
-                return true;
-              }
-            } else {
-              ; return false;
-            }
-          } else if (filter == "continues") {
-            if (task.state == true) {
-                return false;
-            }
-            if (task.name.toLowerCase().includes(filteredText.toLowerCase())) {
-              if (order != 4) {
-                if (task.order != order) {
-                  return false;
-                }
-              }
-              return true;
-            } else {
-              return false;
-            }
-          } else {
-            if (task.name.toLowerCase().includes(filteredText.toLowerCase())) {
-              if (order != 4) {
-                if (task.order != order) {
-                  return false;
-                }
-              }
-              return true;
-            } else {
-              return false;
-            }
-          }
-        })
-      }
-
-
+    <TodoContext.Provider value={{ 
+      tasks, 
+      addTask, 
+      changeState, 
+      deleteTask 
     }}>
       {children}
     </TodoContext.Provider>
-
   );
 }
 

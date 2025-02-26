@@ -1,14 +1,33 @@
 "use client";
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import TodoContext from '../contexts/todocontext';
 
 function TodoList() {
 
-  const { tasks, filteredTasks, changeState, deleteTask } = useContext(TodoContext);
+  const { tasks, changeState, deleteTask } = useContext(TodoContext);
 
   const [selection, setSelection] = useState("");
   const [filteredText, setFilteredText] = useState("");
-  const [orderSize, setOrderSize] = useState(4);
+
+  useEffect(() => {
+    console.log("TodoList tasks:", tasks);
+  }, [tasks]);
+
+  const filterTasks = (selection, tasks, filteredText) => {
+    if (!Array.isArray(tasks)) return [];
+    
+    return tasks.filter((task) => {
+      const matchesSelection = 
+        selection === "" ? true : 
+        selection === "continues" ? task.status === "continues" :
+        selection === "finish" ? task.status === "finish" : true;
+
+      const matchesSearch = 
+        task.name.toLowerCase().includes(filteredText.toLowerCase());
+
+      return matchesSelection && matchesSearch;
+    });
+  };
 
   return (
     <div>
@@ -17,28 +36,21 @@ function TodoList() {
 
       <div class="ml-20 mt-5 inline-flex rounded-md shadow-sm" role="group">
         <button onClick={(e) => {
-          setSelection("finish")
-        }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "finish" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
-          Finish
+          setSelection("")
+        }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
+          All
         </button>
         <button onClick={(e) => {
           setSelection("continues")
-        }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "continues" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
+        }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "continues" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
           Continues
         </button>
         <button onClick={(e) => {
-          setSelection("")
-        }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
-          All
+          setSelection("finish")
+        }} type="button" class={"px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 " + (selection == "finish" ? ("dark:text-sky-400") : ("dark:text-white")) + " dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"}>
+          Finish
         </button>
       </div>
-
-      <select id='order' onChange={(e)=>{setOrderSize(e.target.value)}} class="mt-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-         <option value={1}>Important</option>
-         <option value={2}>Need</option>
-         <option value={3}>Normal</option>
-         <option value={4}>All</option>
-      </select>
 
       <form class="mt-6 mb-6">
         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
@@ -56,49 +68,48 @@ function TodoList() {
 
       <div class="relative overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-          <thead class="text-xs text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" class="px-6 py-3">
-                Task Name
-              </th>
-              <th scope="col" class="px-6 py-3">
-                Task State
-              </th>
-
-              <th scope="col" class="px-6 py-3">
-                Delete?
-              </th>
+              <th scope="col" class="px-6 py-3">Task Name</th>
+              <th scope="col" class="px-6 py-3">Status</th>
+              <th scope="col" class="px-6 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
-
-            {filteredTasks(selection, tasks, filteredText, orderSize).map((task) => {
-              return (
-
-                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                  <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-
-                    {task.state ?
-                      (<strike>{task.name}</strike>) :
-                      (task.name)
-                    }
-
-                  </th>
-                  <td class="px-12 py-4">
-                    {task.state ?
-                      (<button onClick={(e) => changeState(task.id, false)}>Yes</button>) :
-                      (<button onClick={(e) => changeState(task.id, true)}>No</button>)
-                    }
+            {tasks && tasks.length > 0 ? (
+              filterTasks(selection, tasks, filteredText).map((task) => (
+                <tr key={task._id} class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                  <td class="px-6 py-4">{task.name}</td>
+                  <td class="px-6 py-4">
+                    <label class="flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={task.status === "finish"}
+                        onChange={() => changeState(task._id, task.status === "continues" ? "finish" : "continues")}
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      />
+                      <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        {task.status === "finish" ? "Completed" : "In Progress"}
+                      </span>
+                    </label>
                   </td>
-
-                  <td class="px-12 py-4">
-                    <button onClick={(e) => deleteTask(task.id)}>X</button>
+                  <td class="px-6 py-4">
+                    <button 
+                      onClick={() => deleteTask(task._id)}
+                      class="font-medium text-red-600 dark:text-red-500 hover:underline"
+                    >
+                      Delete
+                    </button>
                   </td>
-
                 </tr>
-              )
-            })}
-
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" class="px-6 py-4 text-center">
+                  No tasks found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
